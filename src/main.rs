@@ -17,44 +17,43 @@ struct Intepreter {
 
 impl Intepreter {
     fn new(text: String) -> Self {
-        Intepreter {
+        let mut i = Intepreter {
             text,
             pos: 0,
             current_token: None,
-        }
+        };
+        i.get_next_token();
+        i
     }
 }
 
 // Parser
 impl Intepreter {
-    fn term(&mut self) -> i32 {
+    fn factor(&mut self) -> i32 {
         if let Some(Token::Integer(num)) = self.current_token.take() {
             self.get_next_token();
             num
         } else {
-            panic!()
+            panic!("expect a integer")
         }
     }
 
     fn expr(&mut self) -> i32 {
-        self.get_next_token();
-
-        let mut left = self.term();
+        let mut left = self.factor();
         while let Some(token) = self.current_token.take() {
             self.get_next_token();
             match token {
-                Token::Plus => left += self.term(),
-                Token::Subtract => left -= self.term(),
-                Token::Multiply => left *= self.term(),
+                // Token::Plus => left += self.factor(),
+                // Token::Subtract => left -= self.factor(),
+                Token::Multiply => left *= self.factor(),
                 Token::Divide => {
-                    let right = self.term();
+                    let right = self.factor();
                     if right == 0 {
                         panic!("divide 0");
                     }
                     left /= right;
                 }
-                Token::Eof => break,
-                _ => panic!(),
+                _ => break,
             }
         }
         left
