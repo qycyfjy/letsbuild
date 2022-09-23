@@ -6,6 +6,7 @@ use std::{
 enum Token {
     Integer(i32),
     Plus,
+    Subtract,
     Eof,
 }
 
@@ -14,6 +15,7 @@ impl Display for Token {
         match self {
             Token::Integer(num) => write!(f, "Token(INTEGER, {})", num),
             Token::Plus => write!(f, "Token(PLUS, )"),
+            Token::Subtract => write!(f, "Token(SUBTRACT, "),
             Token::Eof => write!(f, "Token(EOF, )"),
         }
     }
@@ -49,6 +51,12 @@ impl Intepreter {
                 self.current_token = Some(Token::Plus);
                 return;
             }
+
+            if current_char == '-' {
+                self.pos += 1;
+                self.current_token = Some(Token::Subtract);
+                return;
+            }
         }
 
         self.current_token = Some(Token::Eof)
@@ -69,10 +77,18 @@ impl Intepreter {
 
         if let Some(Token::Integer(left)) = self.current_token {
             self.get_next_token();
+
+            let op = self.current_token.take();
+
             self.get_next_token();
             if let Some(Token::Integer(right)) = self.current_token {
                 self.get_next_token();
-                left + right
+
+                match op {
+                    Some(Token::Plus) => left + right,
+                    Some(Token::Subtract) => left - right,
+                    _ => panic!(),
+                }
             } else {
                 panic!("error input")
             }
@@ -118,5 +134,44 @@ fn main() {
         stdin.read_line(&mut line).unwrap();
         let mut i = Intepreter::new(line);
         println!("{}", i.expr());
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
+
+    fn intepret(text: String) -> i32 {
+        let mut i = Intepreter::new(text);
+        return i.expr();
+    }
+
+    #[test]
+    fn test_single_digit_ints_add() {
+        assert_eq!(intepret("1+1".to_string()), 2);
+        assert_eq!(intepret("0+0".to_string()), 0);
+        assert_eq!(intepret("9+9".to_string()), 18);
+    }
+
+    #[test]
+    fn test_multi_digits_ints_add() {
+        assert_eq!(intepret("11+1".to_string()), 12);
+        assert_eq!(intepret("1010101+2222".to_string()), 1012323);
+        assert_eq!(intepret("99+100".to_string()), 199);
+    }
+
+    #[test]
+    fn test_add_with_spaces() {
+        assert_eq!(intepret("   11 +   1".to_string()), 12);
+        assert_eq!(intepret("1010101  + 2222".to_string()), 1012323);
+        assert_eq!(intepret("99 + 100".to_string()), 199);
+    }
+
+    #[test]
+    fn test_minus() {
+        assert_eq!(intepret("   11 -   1".to_string()), 10);
+        assert_eq!(intepret("1012222-2222".to_string()), 1010000);
+        assert_eq!(intepret("99 - 100".to_string()), -1);
     }
 }
