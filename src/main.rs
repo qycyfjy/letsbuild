@@ -35,6 +35,7 @@ impl Intepreter {
     }
 
     fn get_next_token(&mut self) {
+        self.pos = self.skip_whitespaces(self.pos);
         if let Some(current_char) = self.text.chars().nth(self.pos) {
             if let Some(_) = current_char.to_digit(10) {
                 let (num, pos) = self.get_integer(self.pos);
@@ -94,6 +95,17 @@ impl Intepreter {
             }
         }
         (integer, idx)
+    }
+
+    fn skip_whitespaces(&self, mut idx: usize) -> usize {
+        while let Some(current_char) = self.text.chars().nth(idx) {
+            if current_char.is_whitespace() {
+                idx += 1;
+            } else {
+                break;
+            }
+        }
+        idx
     }
 }
 
