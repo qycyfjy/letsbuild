@@ -1,5 +1,6 @@
 mod intepreter;
 mod token;
+mod lexer;
 use intepreter::Intepreter;
 
 use std::io::{self, Write};
@@ -11,6 +12,9 @@ fn main() {
         io::stdout().flush().unwrap();
         let mut line = String::new();
         stdin.read_line(&mut line).unwrap();
+        if line.contains('q') {
+            break;
+        }
         let mut i = Intepreter::new(line);
         println!("{}", i.expr());
     }
