@@ -15,6 +15,7 @@ impl Intepreter {
 }
 
 impl Intepreter {
+    // factor : INTEGER | LParen expr RParen
     fn factor(&mut self) -> i32 {
         match self.lexer.current_token().take() {
             Some(Token::Integer(num)) => {
@@ -23,12 +24,15 @@ impl Intepreter {
             }
             Some(Token::LParen) => {
                 self.lexer.get_next_token();
-                self.expr()
+                let v = self.expr();
+                self.lexer.get_next_token();  // Skip RParen
+                v
             }
             _ => panic!("expect a integer")
         }
     }
 
+    // term : factor ((MUL | DIV) factor)*
     fn term(&mut self) -> i32 {
         let mut left = self.factor();
         while let Some(token) = self.lexer.current_token() {
@@ -51,6 +55,7 @@ impl Intepreter {
         left
     }
 
+    // expr : term ((PLUS | SUB) term)*
     pub fn expr(&mut self) -> i32 {
         let mut left = self.term();
         while let Some(token) = self.lexer.current_token() {
@@ -62,10 +67,6 @@ impl Intepreter {
                 Token::Subtract => {
                     self.lexer.get_next_token();
                     left -= self.term()
-                }
-                Token::RParen => {
-                    self.lexer.get_next_token();
-                    break;
                 }
                 _ => break,
             }
