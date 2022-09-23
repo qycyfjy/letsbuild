@@ -43,6 +43,14 @@ impl Lexer {
                     self.advance();
                     self.current_token = Some(Token::Divide);
                 }
+                c if c == '(' => {
+                    self.advance();
+                    self.current_token = Some(Token::LParen);
+                }
+                c if c == ')' => {
+                    self.advance();
+                    self.current_token = Some(Token::RParen);
+                }
                 _ => unreachable!(),
             }
         } else {

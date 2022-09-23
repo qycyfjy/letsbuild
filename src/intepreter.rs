@@ -14,14 +14,18 @@ impl Intepreter {
     }
 }
 
-// Parser
 impl Intepreter {
     fn factor(&mut self) -> i32 {
-        if let Some(Token::Integer(num)) = self.lexer.current_token().take() {
-            self.lexer.get_next_token();
-            num
-        } else {
-            panic!("expect a integer")
+        match self.lexer.current_token().take() {
+            Some(Token::Integer(num)) => {
+                self.lexer.get_next_token();
+                num
+            }
+            Some(Token::LParen) => {
+                self.lexer.get_next_token();
+                self.expr()
+            }
+            _ => panic!("expect a integer")
         }
     }
 
@@ -58,6 +62,10 @@ impl Intepreter {
                 Token::Subtract => {
                     self.lexer.get_next_token();
                     left -= self.term()
+                }
+                Token::RParen => {
+                    self.lexer.get_next_token();
+                    break;
                 }
                 _ => break,
             }

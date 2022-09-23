@@ -73,4 +73,21 @@ mod tests {
         assert_eq!(intepret("1 / 1 / 1 / 1 / 1".to_string()), 1);
         assert_eq!(intepret("9*9*9*9/9".to_string()), 729);
     }
+
+    #[test]
+    fn test_basic_arithmetic() {
+        assert_eq!(intepret("1 + 2 * 3 - 4".to_string()), 3);
+        assert_eq!(intepret("2 / 2 + 3 * 3".to_string()), 10);
+        assert_eq!(intepret("22 + 30 - 10 * 4/4".to_string()), 42);
+        assert_eq!(intepret("9+9*9-9/9".to_string()), 89);
+    }
+
+    #[test]
+    fn test_parentheses_arithmetic() {
+        assert_eq!(intepret("(1 + 2) * 3 - 4".to_string()), 5);
+        assert_eq!(intepret("2 / 2 + 3 * 3".to_string()), 10);
+        assert_eq!(intepret("22 + 30 - 10 * 4/4".to_string()), 42);
+        assert_eq!(intepret("9+9*(9-9/9)".to_string()), 81);
+        assert_eq!(intepret("(1+1*1*10/(1+3)) * (2-(3+2))".to_string()), -9);
+    }
 }

@@ -4,5 +4,7 @@ pub enum Token {
     Subtract,
     Multiply,
     Divide,
+    LParen,
+    RParen,
     Eof,
 }
