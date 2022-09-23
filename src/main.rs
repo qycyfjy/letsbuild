@@ -36,9 +36,9 @@ impl Intepreter {
 
     fn get_next_token(&mut self) {
         if let Some(current_char) = self.text.chars().nth(self.pos) {
-            if let Some(num) = current_char.to_digit(10) {
-                let num = num as i32;
-                self.pos += 1;
+            if let Some(_) = current_char.to_digit(10) {
+                let (num, pos) = self.get_integer(self.pos);
+                self.pos = pos;
                 self.current_token = Some(Token::Integer(num));
                 return;
             }
@@ -78,6 +78,22 @@ impl Intepreter {
         } else {
             panic!("error input")
         }
+    }
+}
+
+impl Intepreter {
+    fn get_integer(&self, mut idx: usize) -> (i32, usize) {
+        let mut integer = 0;
+        while let Some(current_char) = self.text.chars().nth(idx) {
+            if let Some(digit) = current_char.to_digit(10) {
+                let digit = digit as i32;
+                integer = integer * 10 + digit;
+                idx += 1;
+            } else {
+                break;
+            }
+        }
+        (integer, idx)
     }
 }
 
