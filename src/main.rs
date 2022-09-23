@@ -37,11 +37,11 @@ impl Intepreter {
     }
 
     fn get_next_token(&mut self) {
-        self.pos = self.skip_whitespaces(self.pos);
+        self.skip_whitespaces();
+
         if let Some(current_char) = self.text.chars().nth(self.pos) {
             if let Some(_) = current_char.to_digit(10) {
-                let (num, pos) = self.get_integer(self.pos);
-                self.pos = pos;
+                let num = self.get_integer();
                 self.current_token = Some(Token::Integer(num));
                 return;
             }
@@ -99,29 +99,32 @@ impl Intepreter {
 }
 
 impl Intepreter {
-    fn get_integer(&self, mut idx: usize) -> (i32, usize) {
+    fn advance(&mut self) {
+        self.pos += 1;
+    }
+
+    fn get_integer(&mut self) -> i32 {
         let mut integer = 0;
-        while let Some(current_char) = self.text.chars().nth(idx) {
+        while let Some(current_char) = self.text.chars().nth(self.pos) {
             if let Some(digit) = current_char.to_digit(10) {
                 let digit = digit as i32;
                 integer = integer * 10 + digit;
-                idx += 1;
+                self.advance()
             } else {
                 break;
             }
         }
-        (integer, idx)
+        integer
     }
 
-    fn skip_whitespaces(&self, mut idx: usize) -> usize {
-        while let Some(current_char) = self.text.chars().nth(idx) {
+    fn skip_whitespaces(&mut self) {
+        while let Some(current_char) = self.text.chars().nth(self.pos) {
             if current_char.is_whitespace() {
-                idx += 1;
+                self.advance()
             } else {
                 break;
             }
         }
-        idx
     }
 }
 
