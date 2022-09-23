@@ -1,24 +1,12 @@
-use std::{
-    fmt::Display,
-    io::{self, Write},
-};
+use std::io::{self, Write};
 
 enum Token {
     Integer(i32),
     Plus,
     Subtract,
+    Multiply,
+    Divide,
     Eof,
-}
-
-impl Display for Token {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Token::Integer(num) => write!(f, "Token(INTEGER, {})", num),
-            Token::Plus => write!(f, "Token(PLUS, )"),
-            Token::Subtract => write!(f, "Token(SUBTRACT, "),
-            Token::Eof => write!(f, "Token(EOF, )"),
-        }
-    }
 }
 
 struct Intepreter {
@@ -35,75 +23,82 @@ impl Intepreter {
             current_token: None,
         }
     }
+}
 
-    fn get_next_token(&mut self) {
-        self.skip_whitespaces();
-
-        if let Some(current_char) = self.text.chars().nth(self.pos) {
-            if let Some(_) = current_char.to_digit(10) {
-                let num = self.get_integer();
-                self.current_token = Some(Token::Integer(num));
-                return;
-            }
-
-            if current_char == '+' {
-                self.pos += 1;
-                self.current_token = Some(Token::Plus);
-                return;
-            }
-
-            if current_char == '-' {
-                self.pos += 1;
-                self.current_token = Some(Token::Subtract);
-                return;
-            }
+// Parser
+impl Intepreter {
+    fn term(&mut self) -> i32 {
+        if let Some(Token::Integer(num)) = self.current_token.take() {
+            self.get_next_token();
+            num
+        } else {
+            panic!()
         }
-
-        self.current_token = Some(Token::Eof)
     }
-
-    // fn eat(&mut self, tt: Token) {
-    //     if let Some(t) = self.current_token {
-    //         if std::mem::discriminant(&tt) == std::mem::discriminant(&t) {
-    //             self.get_next_token()
-    //         } else {
-    //             self.error()
-    //         }
-    //     }
-    // }
 
     fn expr(&mut self) -> i32 {
         self.get_next_token();
 
-        if let Some(Token::Integer(left)) = self.current_token {
+        let mut left = self.term();
+        while let Some(token) = self.current_token.take() {
             self.get_next_token();
-
-            let op = self.current_token.take();
-
-            self.get_next_token();
-            if let Some(Token::Integer(right)) = self.current_token {
-                self.get_next_token();
-
-                match op {
-                    Some(Token::Plus) => left + right,
-                    Some(Token::Subtract) => left - right,
-                    _ => panic!(),
+            match token {
+                Token::Plus => left += self.term(),
+                Token::Subtract => left -= self.term(),
+                Token::Multiply => left *= self.term(),
+                Token::Divide => {
+                    let right = self.term();
+                    if right == 0 {
+                        panic!("divide 0");
+                    }
+                    left /= right;
                 }
-            } else {
-                panic!("error input")
+                Token::Eof => break,
+                _ => panic!(),
             }
-        } else {
-            panic!("error input")
         }
+        left
     }
 }
 
+// Lexer
 impl Intepreter {
     fn advance(&mut self) {
         self.pos += 1;
     }
 
-    fn get_integer(&mut self) -> i32 {
+    fn get_next_token(&mut self) {
+        self.skip_whitespaces();
+
+        if let Some(current_char) = self.text.chars().nth(self.pos) {
+            match current_char {
+                c if c.is_digit(10) => {
+                    self.current_token = Some(self.get_integer());
+                }
+                c if c == '+' => {
+                    self.advance();
+                    self.current_token = Some(Token::Plus);
+                }
+                c if c == '-' => {
+                    self.advance();
+                    self.current_token = Some(Token::Subtract);
+                }
+                c if c == '*' => {
+                    self.advance();
+                    self.current_token = Some(Token::Multiply);
+                }
+                c if c == '/' => {
+                    self.advance();
+                    self.current_token = Some(Token::Divide);
+                }
+                _ => unreachable!(),
+            }
+        } else {
+            self.current_token = Some(Token::Eof)
+        }
+    }
+
+    fn get_integer(&mut self) -> Token {
         let mut integer = 0;
         while let Some(current_char) = self.text.chars().nth(self.pos) {
             if let Some(digit) = current_char.to_digit(10) {
@@ -114,7 +109,7 @@ impl Intepreter {
                 break;
             }
         }
-        integer
+        Token::Integer(integer)
     }
 
     fn skip_whitespaces(&mut self) {
@@ -176,5 +171,21 @@ mod tests {
         assert_eq!(intepret("   11 -   1".to_string()), 10);
         assert_eq!(intepret("1012222-2222".to_string()), 1010000);
         assert_eq!(intepret("99 - 100".to_string()), -1);
+    }
+
+    #[test]
+    fn test_only_add_minus() {
+        assert_eq!(intepret("1 + 2 - 3 - 4".to_string()), -4);
+        assert_eq!(intepret("2 - 2 + 3 - 3".to_string()), 0);
+        assert_eq!(intepret("1 + 1 + 1 + 1 + 1".to_string()), 5);
+        assert_eq!(intepret("9+9+9-9-9".to_string()), 9);
+    }
+
+    #[test]
+    fn test_only_multiply_divide() {
+        assert_eq!(intepret("1 * 2 * 3 / 4".to_string()), 1);
+        assert_eq!(intepret("2 / 2 * 3 / 3".to_string()), 1);
+        assert_eq!(intepret("1 / 1 / 1 / 1 / 1".to_string()), 1);
+        assert_eq!(intepret("9*9*9*9/9".to_string()), 729);
     }
 }
