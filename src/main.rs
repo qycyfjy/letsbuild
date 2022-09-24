@@ -3,6 +3,7 @@ mod token;
 mod lexer;
 mod ast;
 mod parser;
+mod visitor;
 
 use std::io::{self, Write};
 
@@ -29,7 +30,8 @@ mod tests {
     use super::*;
 
     fn eval(text: String) -> i32 {
-        1
+        let mut i = intepreter::Intepreter::new(text);
+        i.eval()
     }
 
     #[test]
