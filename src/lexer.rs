@@ -3,7 +3,6 @@ use crate::token::Token;
 pub struct Lexer {
     text: String,
     pos: usize,
-    current_token: Option<Token>,
 }
 
 impl Lexer {
@@ -11,50 +10,45 @@ impl Lexer {
         Lexer {
             text,
             pos: 0,
-            current_token: None,
         }
     }
 
-    pub fn current_token(&mut self) -> &mut Option<Token> {
-        &mut self.current_token
-    }
-
-    pub fn get_next_token(&mut self) {
+    pub fn get_next_token(&mut self) -> Option<Token> {
         self.skip_whitespaces();
 
         if let Some(current_char) = self.text.chars().nth(self.pos) {
             match current_char {
                 c if c.is_digit(10) => {
-                    self.current_token = Some(self.get_integer());
+                    Some(self.get_integer())
                 }
                 c if c == '+' => {
                     self.advance();
-                    self.current_token = Some(Token::Plus);
+                    Some(Token::Plus)
                 }
                 c if c == '-' => {
                     self.advance();
-                    self.current_token = Some(Token::Subtract);
+                    Some(Token::Minus)
                 }
                 c if c == '*' => {
                     self.advance();
-                    self.current_token = Some(Token::Multiply);
+                    Some(Token::Multiply)
                 }
                 c if c == '/' => {
                     self.advance();
-                    self.current_token = Some(Token::Divide);
+                    Some(Token::Divide)
                 }
                 c if c == '(' => {
                     self.advance();
-                    self.current_token = Some(Token::LParen);
+                    Some(Token::LParen)
                 }
                 c if c == ')' => {
                     self.advance();
-                    self.current_token = Some(Token::RParen);
+                    Some(Token::RParen)
                 }
                 _ => unreachable!(),
             }
         } else {
-            self.current_token = Some(Token::Eof)
+            Some(Token::Eof)
         }
     }
 
