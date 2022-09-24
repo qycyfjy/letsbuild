@@ -7,7 +7,7 @@ mod visitor;
 
 use std::io::{self, Write};
 
-use crate::{visitor::{PostOrderVisitor, LispStyleVisitor}};
+use crate::{visitor::{PostOrderVisitor}};
 
 fn main() {
     let stdin = io::stdin();
@@ -19,7 +19,7 @@ fn main() {
         if line.contains('q') {
             break;
         }
-        let mut p = intepreter::Intepreter::new(line, LispStyleVisitor{});
+        let mut p = intepreter::Intepreter::new(line, PostOrderVisitor{});
         println!("{:#?}", p.eval());
     }
 }
@@ -93,5 +93,15 @@ mod tests {
         assert_eq!(eval("22 + 30 - 10 * 4/4".to_string()), 42);
         assert_eq!(eval("9+9*(9-9/9)".to_string()), 81);
         assert_eq!(eval("(1+1*1*10/(1+3)) * (2-(3+2))".to_string()), -9);
+    }
+
+    #[test]
+    fn test_unary() {
+        assert_eq!(eval("-1".to_string()), -1);
+        assert_eq!(eval("-1+1".to_string()), 0);
+        assert_eq!(eval("-(1+1)".to_string()), -2);
+        assert_eq!(eval("1--1".to_string()), 2);
+        assert_eq!(eval("+1--2".to_string()), 3);
+        assert_eq!(eval("+1*-2".to_string()), -2);
     }
 }

@@ -35,9 +35,17 @@ impl Parser {
         self.error()
     }
 
-    // factor : INTEGER | LPAREN expr RPAREN
+    // factor : INTEGER | LPAREN expr RPAREN | (PLUS | MINUS) factor
     fn factor(&mut self) -> Box<ast::Node> {
         match &self.current_token {
+            Some(Token::Plus) => {
+                self.eat(Token::tt_plus());
+                Box::new(ast::Node::UnaryOp { op: ast::Operator::Add, operand: self.factor() })
+            }
+            Some(Token::Minus) => {
+                self.eat(Token::tt_minus());
+                Box::new(ast::Node::UnaryOp { op: ast::Operator::Subtract, operand: self.factor() })
+            }
             Some(Token::Integer(num)) => {
                 let num = *num;
                 self.eat(Token::tt_integer());
