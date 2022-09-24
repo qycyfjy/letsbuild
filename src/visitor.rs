@@ -45,3 +45,20 @@ impl Visitor for RPNVisitor {
         }
     }
 }
+
+pub struct LispStyleVisitor;
+
+impl Visitor for LispStyleVisitor {
+    type Output = String;
+    fn visit(&self, node: Box<ast::Node>) -> Self::Output {
+        match *node {
+            ast::Node::Num(num) => num.to_string(),
+            ast::Node::BinOp { op, left, right } => match op {
+                ast::Operator::Add => format!("(+ {} {})", self.visit(left), self.visit(right)),
+                ast::Operator::Subtract => format!("(- {} {})", self.visit(left), self.visit(right)),
+                ast::Operator::Multiply => format!("(* {} {})", self.visit(left), self.visit(right)),
+                ast::Operator::Divide => format!("(/ {} {})", self.visit(left), self.visit(right)),
+            },
+        }
+    }
+}

@@ -4,11 +4,10 @@ mod lexer;
 mod ast;
 mod parser;
 mod visitor;
-pub mod Intepreter;
 
 use std::io::{self, Write};
 
-use crate::{parser::Parser, visitor::{PostOrderVisitor, RPNVisitor}};
+use crate::{visitor::{PostOrderVisitor, LispStyleVisitor}};
 
 fn main() {
     let stdin = io::stdin();
@@ -20,7 +19,7 @@ fn main() {
         if line.contains('q') {
             break;
         }
-        let mut p = intepreter::Intepreter::new(line, RPNVisitor{});
+        let mut p = intepreter::Intepreter::new(line, LispStyleVisitor{});
         println!("{:#?}", p.eval());
     }
 }
