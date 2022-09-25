@@ -17,5 +17,14 @@ pub enum Node {
         op: Operator,
         left: Box<Node>,
         right: Box<Node>
-    }
+    },
+    Compound {
+        children: Vec<Box<Node>>,
+    },
+    Assign {
+        left: Box<Node>,
+        right: Box<Node>,
+    },
+    Var(String),
+    NoOp,
 }

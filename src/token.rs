@@ -6,6 +6,14 @@ pub enum Token {
     Divide,
     LParen,
     RParen,
+
+    Begin,
+    End,
+    Dot,
+    Id(String),
+    Assign,
+    Semi,
+
     Eof,
 }
 
@@ -43,5 +51,35 @@ impl Token {
     #[inline]
     pub fn tt_rparen() -> Token {
         Token::RParen
+    }
+
+    #[inline]
+    pub fn tt_begin() -> Token {
+        Token::Begin
+    }
+
+    #[inline]
+    pub fn tt_end() -> Token {
+        Token::End
+    }
+
+    #[inline]
+    pub fn tt_dot() -> Token {
+        Token::Dot
+    }
+
+    #[inline]
+    pub fn tt_id() -> Token {
+        Token::Id(String::new())
+    }
+
+    #[inline]
+    pub fn tt_assign() -> Token {
+        Token::Assign
+    }
+
+    #[inline]
+    pub fn tt_semi() -> Token {
+        Token::Semi
     }
 }
