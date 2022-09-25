@@ -38,7 +38,7 @@ impl Parser {
     // program : compound_statment DOT
     fn program(&mut self) -> Box<ast::Node> {
         let node = self.compound_statement();
-        self.eat(Token::Dot);
+        self.eat(Token::tt_dot());
         node
     }
 
