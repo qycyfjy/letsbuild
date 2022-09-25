@@ -19,8 +19,9 @@ fn main() {
         if line.contains('q') {
             break;
         }
-        let mut p = parser::Parser::new(line);
-        println!("{:#?}", p.parse());
+        let mut p = intepreter::Intepreter::new(line, PostOrderVisitor{});
+        p.eval();
+        println!("{:#?}", p.get_env());
     }
 }
 
